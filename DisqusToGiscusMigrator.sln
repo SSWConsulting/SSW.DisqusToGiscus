@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35222.181
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DisqusToGiscusMigrator", "DisqusToGiscusMigrator\DisqusToGiscusMigrator.csproj", "{C94CB3E7-09A4-4FA0-BED5-47D3391FAD17}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C94CB3E7-09A4-4FA0-BED5-47D3391FAD17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C94CB3E7-09A4-4FA0-BED5-47D3391FAD17}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C94CB3E7-09A4-4FA0-BED5-47D3391FAD17}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C94CB3E7-09A4-4FA0-BED5-47D3391FAD17}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8B83F1C3-0C02-418E-80B3-B607D05A4234}
+	EndGlobalSection
+EndGlobal
