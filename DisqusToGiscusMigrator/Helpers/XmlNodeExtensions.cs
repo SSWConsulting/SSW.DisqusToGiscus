@@ -1,6 +1,6 @@
 using System.Xml;
 
-namespace DisqusToGiscusMigrator;
+namespace DisqusToGiscusMigrator.Helpers;
 
 public static class XmlNodeExtensions
 {
@@ -28,13 +28,13 @@ public static class XmlNodeExtensions
 
     public static string NodeValue(this XmlNode node)
     {
-        var value = node.FirstChild?.Value ?? String.Empty;
+        var value = node.FirstChild?.Value ?? string.Empty;
         return value.Trim();
     }
 
     public static T AttributeValue<T>(this XmlNode node, int index)
     {
-        return node.AttributeValue(index, default(T));
+        return node.AttributeValue<T>(index, default(T));
     }
 
     public static T AttributeValue<T>(this XmlNode node, int index, T def)
@@ -43,7 +43,7 @@ public static class XmlNodeExtensions
         {
             return def;
         }
-        if (node.Attributes.Count == 0)
+        if (node.Attributes?.Count == 0)
         {
             return def;
         }
@@ -60,7 +60,7 @@ public static class XmlNodeExtensions
 
     public static string AttributeValue(this XmlNode node, int index)
     {
-        var value = node.Attributes[index]?.Value;
+        var value = node.Attributes?[index].Value;
         return value?.Trim() ?? string.Empty;
     }
 }

@@ -8,11 +8,13 @@ public class DisqusPost
     public string Message { get; set; }
     public DateTime CreatedAt { get; set; }
     public string Author { get; set; }
+    public string Username { get; set; }
 
     public DisqusPost(long id)
     {
         Id = id;
         Message = string.Empty;
         Author = string.Empty;
+        Username = string.Empty;
     }
 }
