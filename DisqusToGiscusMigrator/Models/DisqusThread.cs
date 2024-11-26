@@ -12,11 +12,14 @@ public class DisqusThread
 
     public DateTime CreatedAt { get; set; }
 
+    public string MarkdownFileLocation { get; set; }
+
     public DisqusThread(long id)
     {
         Id = id;
         Title = string.Empty;
         Url = string.Empty;
-        Posts = new List<DisqusPost>();
+        Posts = [];
+        MarkdownFileLocation = string.Empty;
     }
 }
