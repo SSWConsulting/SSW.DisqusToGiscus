@@ -1,20 +1,18 @@
 namespace DisqusToGiscusMigrator.Models;
 
-public class DisqusPost
+public class DisqusPost(long id)
 {
-    public long Id { get; }
-    public long ThreadId { get; set; }
-    public long Parent { get; set; }
-    public string Message { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public string Author { get; set; }
-    public string Username { get; set; }
+    public long Id { get; } = id;
 
-    public DisqusPost(long id)
-    {
-        Id = id;
-        Message = string.Empty;
-        Author = string.Empty;
-        Username = string.Empty;
-    }
+    public long ThreadId { get; set; }
+
+    public long Parent { get; set; }
+
+    public string Message { get; set; } = string.Empty;
+
+    public DateTime CreatedAt { get; set; }
+
+    public string Author { get; set; } = string.Empty;
+
+    public string Username { get; set; } = string.Empty;
 }

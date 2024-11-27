@@ -1,25 +1,16 @@
 namespace DisqusToGiscusMigrator.Models;
 
-public class DisqusThread
+public class DisqusThread(long id)
 {
-    public long Id { get; }
+    public long Id { get; } = id;
 
-    public string Title { get; set; }
+    public string Title { get; set; } = string.Empty;
 
-    public string Url { get; set; }
+    public string Url { get; set; } = string.Empty;
 
-    public List<DisqusPost> Posts { get; }
+    public List<DisqusPost> Posts { get; } = [];
 
     public DateTime CreatedAt { get; set; }
 
-    public string MarkdownFileLocation { get; set; }
-
-    public DisqusThread(long id)
-    {
-        Id = id;
-        Title = string.Empty;
-        Url = string.Empty;
-        Posts = [];
-        MarkdownFileLocation = string.Empty;
-    }
+    public Rule Rule { get; set; } = new Rule();
 }
