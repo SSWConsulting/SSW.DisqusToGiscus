@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using System.Threading;
 using DisqusToGiscusMigrator.Constants;
 using DisqusToGiscusMigrator.Helpers;
 using DisqusToGiscusMigrator.Models;

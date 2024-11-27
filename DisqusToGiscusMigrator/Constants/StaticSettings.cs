@@ -14,10 +14,7 @@ public static class StaticSettings
 
     public static readonly string[] IgnoredUsers =
     [
-        "disqus_9qND497TKc",
-        "matteightyate",
-        "tiagov8",
-        "disqus_GUDwEt6KYY"
+        ""
     ];
 
     public static Dictionary<string, string> ForcedFileLocations { get; } = new()
