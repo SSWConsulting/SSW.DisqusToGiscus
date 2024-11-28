@@ -1,6 +1,6 @@
 ﻿using DisqusToGiscusMigrator.Constants;
-using System.Text.Json;
 using DisqusToGiscusMigrator.Models;
+using System.Text.Json;
 using Markdig;
 using Markdig.Syntax;
 using Markdig.Extensions.Yaml;
@@ -79,7 +79,7 @@ public static class RuleHelper
             catch
             {
                 Logger.Log($"Failed to access this rule file: {thread.Rule.File}", LogLevel.Warning);
-                Logger.Log($"Failed disqus thread rule URL: {thread.Url}", LogLevel.Warning);
+                Logger.Log($"Failed Disqus thread URL: {thread.Url}", LogLevel.Warning);
             }
             
 

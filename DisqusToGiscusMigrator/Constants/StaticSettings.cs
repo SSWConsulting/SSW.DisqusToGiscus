@@ -4,19 +4,23 @@ public static class StaticSettings
 {
     public const string DisqusCommentsPath = @"C:\\Users\\baban\\Downloads\\disqus-comments.xml";
 
+    public const string GitHubUsername = "ssw-rules-comments-migrator";
     public const string GitHubRepoRawPath = "https://raw.githubusercontent.com/SSWConsulting/SSW.Rules.Content/refs/heads/main/";
 
     public const string RulesHistoryJsonUrl = "https://www.ssw.com.au/rules/history.json";
 
-    public const string GitHubOwner = "SSWConsulting";
+    public const string RepoOwner = "SSWConsulting";
     
-    public const string GitHubRepo = "SSW.Rules.Content";
+    public const string RepoName = "SSW.Rules.Staging.Discussions";
 
     public static readonly string[] IgnoredUsers =
     [
         ""
     ];
 
+    // Forcing these file locations for the given rules.
+    // Because when using history.json to get file property and use it to read markdown content
+    // I faced issue where the location wasn't correct anymore due to url/folder name changes
     public static Dictionary<string, string> ForcedFileLocations { get; } = new()
     {
         { "https://ssw.com.au/rules/do-you-understand-the-value-of-consistency", "rules/the-value-of-consistency/rule.md" },
@@ -36,5 +40,14 @@ public static class StaticSettings
         { "https://ssw.com.au/rules/monetize-gpt-models/", "rules/create-gpts/rule.md" },
         { "https://www.ssw.com.au/rules/dns-what-and-how-it-works/", "rules/what-is-dns/rule.md" },
         { "https://www.ssw.com.au/rules/manage-urges/", "rules/separate-urge-from-behavior/rule.md" }
+    };
+
+
+    // Multilevel reply comments is not supported in GitHub discussions
+    // So forcing to change the parent with the single top level comment id
+    public static Dictionary<long, long> MultiLevelReplyComments { get; } = new()
+    {
+        { 5492294233, 5491639342 },
+        { 6292194250, 6288502889 }
     };
 }
