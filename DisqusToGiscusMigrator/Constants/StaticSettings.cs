@@ -3,9 +3,14 @@ namespace DisqusToGiscusMigrator.Constants;
 public static class StaticSettings
 {
     public const string DisqusCommentsPath = @"C:\\Users\\baban\\Downloads\\disqus-comments.xml";
+    
+    public const string BotPAT = "{{PLACEHOLDER}}";
 
-    public const string GitHubUsername = "ssw-rules-comments-migrator";
-    public const string GitHubRepoRawPath = "https://raw.githubusercontent.com/SSWConsulting/SSW.Rules.Content/refs/heads/main/";
+    public const string MainPAT = "{{PLACEHOLDER}}";
+
+    public const string BotGitHubUsername = "ssw-rules-comments-migrator";
+
+    public const string ContentRepoRawPath = "https://raw.githubusercontent.com/SSWConsulting/SSW.Rules.Content/refs/heads/main/";
 
     public const string RulesHistoryJsonUrl = "https://www.ssw.com.au/rules/history.json";
 
@@ -13,9 +18,11 @@ public static class StaticSettings
     
     public const string RepoName = "SSW.Rules.Staging.Discussions";
 
+    public const string DiscussionCategory = "Test Migration";
+
     public static readonly string[] IgnoredUsers =
     [
-        ""
+        "{{PLACEHOLDER}}"
     ];
 
     // Forcing these file locations for the given rules.
@@ -42,6 +49,16 @@ public static class StaticSettings
         { "https://www.ssw.com.au/rules/manage-urges/", "rules/separate-urge-from-behavior/rule.md" }
     };
 
+    // Here forcing to replace the Disqus username mentions in the comments with Disqus user display name
+    // This is because Disqus mentions are in this format "@username:disqus" and
+    // it can lead to broken links when the comment is migrated to GitHub discussions and
+    // it tries to find GitHub user using Disqus username.
+    // Luckily there were 2 cases for this scenario
+    public static Dictionary<long, string> DisqusMentions { get; } = new()
+    {
+        { 6105939616, "{{PLACEHOLDER}}" },
+        { 6201620423, "{{PLACEHOLDER}}" }
+    };
 
     // Multilevel reply comments is not supported in GitHub discussions
     // So forcing to change the parent with the single top level comment id
