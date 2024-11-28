@@ -18,9 +18,9 @@ public static class RuleHelper
 {
     private static readonly HttpClient _httpClient = new();
 
-    public static async Task SetMarkdownFileLocation(List<DisqusThread> threads)
+    public static async Task SetMarkdownFileLocation(List<DisqusBlogPost> threads)
     {
-        Logger.Log(nameof(SetMarkdownFileLocation));
+        Logger.LogMethod(nameof(SetMarkdownFileLocation));
 
         var response = await _httpClient.GetAsync(StaticSettings.RulesHistoryJsonUrl);
         var rulesHistory = new List<RulesHistory>();
@@ -58,9 +58,9 @@ public static class RuleHelper
         }
     }
 
-    public static async Task SetGuid(List<DisqusThread> threads)
+    public static async Task SetGuid(List<DisqusBlogPost> threads)
     {
-        Logger.Log(nameof(SetGuid));
+        Logger.LogMethod(nameof(SetGuid));
 
         var pipeline = new MarkdownPipelineBuilder()
             .UseYamlFrontMatter()
@@ -68,7 +68,7 @@ public static class RuleHelper
 
         foreach (var thread in threads)
         {
-            var url = $"{StaticSettings.GitHubRepoRawPath}{thread.Rule.File}";
+            var url = $"{StaticSettings.ContentRepoRawPath}{thread.Rule.File}";
 
             string? ruleRawContent = string.Empty;
 
