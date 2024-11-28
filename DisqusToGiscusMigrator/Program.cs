@@ -8,23 +8,25 @@ namespace DisqusToGiscusMigrator;
 public class Program
 {
     private static readonly HttpClient _httpClient = new();
+    private static readonly GitHubHelper _githubHelper = new();
 
     public static async Task Main()
     {
-        var path = StaticSettings.DisqusCommentsPath;
-        var threads = XmlParser.Parse(path);
+        var disqusBlogPosts = XmlParser.Parse(StaticSettings.DisqusCommentsPath);
 
-        await RuleHelper.SetMarkdownFileLocation(threads);
-        await RuleHelper.SetGuid(threads);
+        await RuleHelper.SetMarkdownFileLocation(disqusBlogPosts);
+        await RuleHelper.SetGuid(disqusBlogPosts);
 
-        WriteToJson(threads);
+        await _githubHelper.AssociateDiscussions(disqusBlogPosts);
+
+        WriteToJson(disqusBlogPosts);
 
         Logger.Log("Migration is finished", LogLevel.Info);
     }
 
-    private static void WriteToJson(List<DisqusThread> threads)
+    private static void WriteToJson(List<DisqusBlogPost> threads)
     {
-        Logger.Log(nameof(WriteToJson));
+        Logger.LogMethod(nameof(WriteToJson));
 
         var json = JsonSerializer.Serialize(threads, new JsonSerializerOptions
         {
