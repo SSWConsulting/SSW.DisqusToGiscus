@@ -16,7 +16,7 @@ public class Logger
         Console.ResetColor();
     }
 
-    public static void Log(string method)
+    public static void LogMethod(string method)
     {
         Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Running {method} ...");
     }

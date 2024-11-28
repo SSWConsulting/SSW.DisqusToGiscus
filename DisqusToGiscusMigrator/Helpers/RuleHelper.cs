@@ -1,6 +1,6 @@
 ﻿using DisqusToGiscusMigrator.Constants;
-using System.Text.Json;
 using DisqusToGiscusMigrator.Models;
+using System.Text.Json;
 using Markdig;
 using Markdig.Syntax;
 using Markdig.Extensions.Yaml;
@@ -18,9 +18,9 @@ public static class RuleHelper
 {
     private static readonly HttpClient _httpClient = new();
 
-    public static async Task SetMarkdownFileLocation(List<DisqusThread> threads)
+    public static async Task SetMarkdownFileLocation(List<DisqusBlogPost> threads)
     {
-        Logger.Log(nameof(SetMarkdownFileLocation));
+        Logger.LogMethod(nameof(SetMarkdownFileLocation));
 
         var response = await _httpClient.GetAsync(StaticSettings.RulesHistoryJsonUrl);
         var rulesHistory = new List<RulesHistory>();
@@ -58,9 +58,9 @@ public static class RuleHelper
         }
     }
 
-    public static async Task SetGuid(List<DisqusThread> threads)
+    public static async Task SetGuid(List<DisqusBlogPost> threads)
     {
-        Logger.Log(nameof(SetGuid));
+        Logger.LogMethod(nameof(SetGuid));
 
         var pipeline = new MarkdownPipelineBuilder()
             .UseYamlFrontMatter()
@@ -68,7 +68,7 @@ public static class RuleHelper
 
         foreach (var thread in threads)
         {
-            var url = $"{StaticSettings.GitHubRepoRawPath}{thread.Rule.File}";
+            var url = $"{StaticSettings.ContentRepoRawPath}{thread.Rule.File}";
 
             string? ruleRawContent = string.Empty;
 
@@ -79,7 +79,7 @@ public static class RuleHelper
             catch
             {
                 Logger.Log($"Failed to access this rule file: {thread.Rule.File}", LogLevel.Warning);
-                Logger.Log($"Failed disqus thread rule URL: {thread.Url}", LogLevel.Warning);
+                Logger.Log($"Failed Disqus thread URL: {thread.Url}", LogLevel.Warning);
             }
             
 

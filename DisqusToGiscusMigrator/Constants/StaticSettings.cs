@@ -3,20 +3,31 @@ namespace DisqusToGiscusMigrator.Constants;
 public static class StaticSettings
 {
     public const string DisqusCommentsPath = @"C:\\Users\\baban\\Downloads\\disqus-comments.xml";
+    
+    public const string BotPAT = "{{PLACEHOLDER}}";
 
-    public const string GitHubRepoRawPath = "https://raw.githubusercontent.com/SSWConsulting/SSW.Rules.Content/refs/heads/main/";
+    public const string MainPAT = "{{PLACEHOLDER}}";
+
+    public const string BotGitHubUsername = "ssw-rules-comments-migrator";
+
+    public const string ContentRepoRawPath = "https://raw.githubusercontent.com/SSWConsulting/SSW.Rules.Content/refs/heads/main/";
 
     public const string RulesHistoryJsonUrl = "https://www.ssw.com.au/rules/history.json";
 
-    public const string GitHubOwner = "SSWConsulting";
+    public const string RepoOwner = "SSWConsulting";
     
-    public const string GitHubRepo = "SSW.Rules.Content";
+    public const string RepoName = "SSW.Rules.Staging.Discussions";
+
+    public const string DiscussionCategory = "Test Migration";
 
     public static readonly string[] IgnoredUsers =
     [
-        ""
+        "{{PLACEHOLDER}}"
     ];
 
+    // Forcing these file locations for the given rules.
+    // Because when using history.json to get file property and use it to read markdown content
+    // I faced issue where the location wasn't correct anymore due to url/folder name changes
     public static Dictionary<string, string> ForcedFileLocations { get; } = new()
     {
         { "https://ssw.com.au/rules/do-you-understand-the-value-of-consistency", "rules/the-value-of-consistency/rule.md" },
@@ -36,5 +47,24 @@ public static class StaticSettings
         { "https://ssw.com.au/rules/monetize-gpt-models/", "rules/create-gpts/rule.md" },
         { "https://www.ssw.com.au/rules/dns-what-and-how-it-works/", "rules/what-is-dns/rule.md" },
         { "https://www.ssw.com.au/rules/manage-urges/", "rules/separate-urge-from-behavior/rule.md" }
+    };
+
+    // Here forcing to replace the Disqus username mentions in the comments with Disqus user display name
+    // This is because Disqus mentions are in this format "@username:disqus" and
+    // it can lead to broken links when the comment is migrated to GitHub discussions and
+    // it tries to find GitHub user using Disqus username.
+    // Luckily there were 2 cases for this scenario
+    public static Dictionary<long, string> DisqusMentions { get; } = new()
+    {
+        { 6105939616, "{{PLACEHOLDER}}" },
+        { 6201620423, "{{PLACEHOLDER}}" }
+    };
+
+    // Multilevel reply comments is not supported in GitHub discussions
+    // So forcing to change the parent with the single top level comment id
+    public static Dictionary<long, long> MultiLevelReplyComments { get; } = new()
+    {
+        { 5492294233, 5491639342 },
+        { 6292194250, 6288502889 }
     };
 }
