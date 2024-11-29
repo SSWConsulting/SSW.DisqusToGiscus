@@ -3,7 +3,7 @@ namespace DisqusToGiscusMigrator.Models;
 public class DisqusComment(
     long id,
     long disqusBlogPostId,
-    long parentId,
+    long? parentId,
     string message,
     DateTime createdAt,
     string authorName,
@@ -11,15 +11,17 @@ public class DisqusComment(
 {
     public long Id { get; } = id;
 
-    public long DisqusBlogPostId { get; set; } = disqusBlogPostId;
+    public long DisqusBlogPostId { get; } = disqusBlogPostId;
 
     public long? ParentId { get; set; } = parentId;
 
     public string Message { get; set; } = message;
 
-    public DateTime CreatedAt { get; set; } = createdAt;
+    public DateTime CreatedAt { get; } = createdAt;
 
-    public string AuthorName { get; set; } = authorName;
+    public string AuthorName { get; } = authorName;
 
-    public string AuthorUsername { get; set; } = authorUsername;
+    public string AuthorUsername { get; } = authorUsername;
+
+    public GitHubComment? AssociatedGitHubComment { get; set; }
 }
