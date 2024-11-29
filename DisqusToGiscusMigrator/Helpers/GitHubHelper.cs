@@ -24,14 +24,14 @@ public class GitHubHelper
         var repoId = await GetRepositoryId();
         var categoryId = await GetCategoryId();
 
-        foreach (var post in disqusBlogPosts.Where(x => x.AssociatedDiscussion is null))
+        foreach (var post in disqusBlogPosts.Where(x => x.AssociatedGitHubDiscussion is null))
         {
             try
             {
                 var discussion = await FindDiscussionByGuid(post.Rule.Guid) ??
                                  await CreateDiscussion(post, repoId, categoryId);
 
-                post.AssociatedDiscussion = discussion;
+                post.AssociatedGitHubDiscussion = discussion;
             }
             catch (Exception)
             {
@@ -59,6 +59,7 @@ public class GitHubHelper
                         Nodes = edge.Node.Select(node => node.Switch<GitHubDiscussion>(
                             when => when.Discussion(discussion => new GitHubDiscussion()
                             {
+                                ID = discussion.Id.Value,
                                 Title = discussion.Title,
                                 Body = discussion.Body,
                                 ID = discussion.Id,
@@ -115,6 +116,7 @@ public class GitHubHelper
                 })
                 .Select(x => new GitHubDiscussion
                 {
+                    ID = x.Discussion.Id.Value,
                     Title = x.Discussion.Title,
                     Body = x.Discussion.Body,
                     ID = x.Discussion.Id,
@@ -122,22 +124,16 @@ public class GitHubHelper
                 });
 
             var discussion = await _botConnection.Run(mutation);
-            if (discussion is not { })
+            if (discussion is null)
             {
-                throw new Exception($"Failed to create discussion for Disqus blog post ({post.Id})");
+                throw new Exception($"Failed to create discussion");
             }
 
             Logger.Log($"Created discussion for Disqus blog post ({post.Id})", LogLevel.Info);
 
             await Task.Delay(3_000);
 
-            return new GitHubDiscussion
-            {
-                Title = discussion.Title,
-                Body = discussion.Body,
-                ID = discussion.ID,
-                Number = discussion.Number
-            };
+            return discussion;
         }
         catch (Exception)
         {
@@ -207,6 +203,7 @@ public class GitHubHelper
             {
                 discussions.Add(new GitHubDiscussion
                 {
+                    ID = discussion.Id.Value,
                     Title = discussion.Title,
                     Body = discussion.Body,
                     ID = discussion.Id,
@@ -234,7 +231,6 @@ public class GitHubHelper
                 .Compile();
 
             var id = await _botConnection.Run(query);
-            Logger.LogMethod($"Repo id: {id}");
             return id;
         }
         catch (Exception)
@@ -263,7 +259,6 @@ public class GitHubHelper
             var result = await _botConnection.Run(query);
 
             var id = result.Single(x => x.Name.Equals(StaticSettings.DiscussionCategory)).Id;
-            Logger.LogMethod($"Category id: {id}");
             return id;
         }
         catch (Exception)
