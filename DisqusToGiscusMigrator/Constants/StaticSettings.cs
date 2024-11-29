@@ -2,7 +2,7 @@ namespace DisqusToGiscusMigrator.Constants;
 
 public static class StaticSettings
 {
-    public const string DisqusCommentsPath = @"C:\\Users\\baban\\Downloads\\disqus-comments.xml";
+    public const string DisqusCommentsPath = "{{PATH_TO_DISQUS_XML_FILE}}";
     
     public const string BotPAT = "{{PLACEHOLDER}}";
 
@@ -20,14 +20,19 @@ public static class StaticSettings
 
     public const string DiscussionCategory = "Test Migration";
 
-    public static readonly string[] IgnoredUsers =
+    public static readonly string[] IgnoredDisqusUsername =
     [
         "{{PLACEHOLDER}}"
     ];
 
-    // Forcing these file locations for the given rules.
-    // Because when using history.json to get file property and use it to read markdown content
-    // I faced issue where the location wasn't correct anymore due to url/folder name changes
+    /// <summary>
+    /// <key>Disqus thread URL <see cref="string"/></key>    
+    /// <value>Markdown file location <see cref="string"/></value>
+    /// <description>
+    /// Use specified file location instead of getting it from history.json,
+    /// as I faced issue where the location wasn't correct anymore due to url/folder name changes
+    /// </description>
+    /// </summary>
     public static Dictionary<string, string> ForcedFileLocations { get; } = new()
     {
         { "https://ssw.com.au/rules/do-you-understand-the-value-of-consistency", "rules/the-value-of-consistency/rule.md" },
@@ -49,19 +54,25 @@ public static class StaticSettings
         { "https://www.ssw.com.au/rules/manage-urges/", "rules/separate-urge-from-behavior/rule.md" }
     };
 
-    // Here forcing to replace the Disqus username mentions in the comments with Disqus user display name
-    // This is because Disqus mentions are in this format "@username:disqus" and
-    // it can lead to broken links when the comment is migrated to GitHub discussions and
-    // it tries to find GitHub user using Disqus username.
-    // Luckily there were 2 cases for this scenario
+    /// <summary>
+    /// <key>Id of Disqus comment which has mentions(@username:discus) in the message property <see cref="long"/></key>
+    /// <value>Replace the mentions with the specified value <see cref="string"/></value>
+    /// <description>
+    /// To avoid broken links in GitHub discussions, because when "@username:disqus" is added
+    /// to GitHub discussion, it will be the link to the GitHub user.
+    /// </description> 
+    /// </summary>
     public static Dictionary<long, string> DisqusMentions { get; } = new()
     {
         { 6105939616, "{{PLACEHOLDER}}" },
         { 6201620423, "{{PLACEHOLDER}}" }
     };
 
-    // Multilevel reply comments is not supported in GitHub discussions
-    // So forcing to change the parent with the single top level comment id
+    /// <summary>
+    /// <key>Id of Disqus miltilevel reply comment <see cref="long"/></key>
+    /// <value>New value for Parent Id property of multilevel comment <see cref="long"/></value>
+    /// <description>Multilevel reply comments is not supported in GitHub discussions</description>
+    /// </summary>
     public static Dictionary<long, long> MultiLevelReplyComments { get; } = new()
     {
         { 5492294233, 5491639342 },

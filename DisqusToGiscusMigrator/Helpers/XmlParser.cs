@@ -109,7 +109,7 @@ public static class XmlParser
                 continue;
             }
 
-            if (StaticSettings.IgnoredUsers.Where(u => u.Equals(authorUsername)).Any())
+            if (StaticSettings.IgnoredDisqusUsername.Where(u => u.Equals(authorUsername)).Any())
             {
                 continue;
             }
