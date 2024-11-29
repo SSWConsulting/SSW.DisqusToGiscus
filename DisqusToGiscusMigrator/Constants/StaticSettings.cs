@@ -26,13 +26,11 @@ public static class StaticSettings
     ];
 
     /// <summary>
-    /// <key>Disqus thread URL <see cref="string"/></key>    
-    /// <value>Markdown file location <see cref="string"/></value>
-    /// <description>
     /// Use specified file location instead of getting it from history.json,
     /// as I faced issue where the location wasn't correct anymore due to url/folder name changes
-    /// </description>
     /// </summary>
+    /// <key type="string">Disqus thread URL</key>    
+    /// <value type="string">Markdown file location</value>
     public static Dictionary<string, string> ForcedFileLocations { get; } = new()
     {
         { "https://ssw.com.au/rules/do-you-understand-the-value-of-consistency", "rules/the-value-of-consistency/rule.md" },
@@ -55,13 +53,11 @@ public static class StaticSettings
     };
 
     /// <summary>
-    /// <key>Id of Disqus comment which has mentions(@username:discus) in the message property <see cref="long"/></key>
-    /// <value>Replace the mentions with the specified value <see cref="string"/></value>
-    /// <description>
-    /// To avoid broken links in GitHub discussions, because when "@username:disqus" is added
-    /// to GitHub discussion, it will be the link to the GitHub user.
-    /// </description> 
+    /// To avoid broken links in GitHub discussions, because when "@username:disqus" is
+    /// added to GitHub discussion, it will be the link to the GitHub user.
     /// </summary>
+    /// <key type="long">Id of Disqus comment which has mentions(@username:discus) in the message property</key>
+    /// <value type="string">Replace the mentions with the specified value</value>
     public static Dictionary<long, string> DisqusMentions { get; } = new()
     {
         { 6105939616, "{{PLACEHOLDER}}" },
@@ -69,10 +65,10 @@ public static class StaticSettings
     };
 
     /// <summary>
-    /// <key>Id of Disqus miltilevel reply comment <see cref="long"/></key>
-    /// <value>New value for Parent Id property of multilevel comment <see cref="long"/></value>
-    /// <description>Multilevel reply comments is not supported in GitHub discussions</description>
+    /// Multilevel reply comments is not supported in GitHub discussions
     /// </summary>
+    /// <key type="long">Id of Disqus miltilevel reply comment</key>
+    /// <value type="long">New value for Parent Id property of multilevel comment</value>
     public static Dictionary<long, long> MultiLevelReplyComments { get; } = new()
     {
         { 5492294233, 5491639342 },
