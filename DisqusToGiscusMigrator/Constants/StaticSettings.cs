@@ -2,11 +2,13 @@ namespace DisqusToGiscusMigrator.Constants;
 
 public static class StaticSettings
 {
-    public const string DisqusCommentsPath = "{{PATH_TO_DISQUS_XML_FILE}}";
-    
-    public const string BotPAT = "{{PLACEHOLDER}}";
+    public const string DisqusCommentsXmlPath = "{{PATH_TO_DISQUS_XML_FILE}}";
 
-    public const string MainPAT = "{{PLACEHOLDER}}";
+    public const string CheckPointFilePath = "{{PATH_TO_JSON_CHEKPOINT_FILE}}";
+
+    public const string BotPAT = "{{BOT_PAT}}";
+
+    public const string MainPAT = "{{MAIN_PAT}}";
 
     public const string BotGitHubUsername = "ssw-rules-comments-migrator";
 
@@ -22,7 +24,7 @@ public static class StaticSettings
 
     public static readonly string[] IgnoredDisqusUsername =
     [
-        "{{PLACEHOLDER}}"
+        "{{DISQUS_USERNAME}}"
     ];
 
     /// <summary>
