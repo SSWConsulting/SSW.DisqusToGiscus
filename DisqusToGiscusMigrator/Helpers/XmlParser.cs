@@ -7,6 +7,8 @@ namespace DisqusToGiscusMigrator.Helpers;
 
 public static class XmlParser
 {
+    private static readonly Regex DisqusUserRegex = new(@"@([\w_\-0-9]+)\:disqus", RegexOptions.Compiled);
+
     public static List<DisqusBlogPost> Parse(string path)
     {
         if (File.Exists(path))
@@ -19,35 +21,37 @@ public static class XmlParser
             nsmgr.AddNamespace("def", "http://disqus.com");
             nsmgr.AddNamespace("dsq", "http://disqus.com/disqus-internals");
 
-            var disqusBlogPosts = FindDisqusBlogPosts(doc, nsmgr);
-            var disqusComments = FindDisqusComments(doc, nsmgr);
-            disqusBlogPosts = MergeThreadsWithPosts(disqusBlogPosts, disqusComments);
+            var blogPosts = FindDisqusBlogPosts(doc, nsmgr);
+            var comments = FindDisqusComments(doc, nsmgr);
+            FixDisqusUserMentions(comments);
 
-            return disqusBlogPosts;
+            var result = MergeThreadsWithPosts(blogPosts, comments);
+
+            return result;
         }
         else
         {
-            Console.WriteLine("File does not exist");
+            Logger.Log("Xml file does not exist", LogLevel.Warning);
             return [];
         }
     }
 
-    private static List<DisqusBlogPost> FindDisqusBlogPosts(XmlDocument doc, XmlNamespaceManager nsmgr)
+    private static IDictionary<long, DisqusBlogPost> FindDisqusBlogPosts(XmlDocument doc, XmlNamespaceManager nsmgr)
     {
         Logger.LogMethod(nameof(FindDisqusBlogPosts));
+        var blogPosts = new Dictionary<long, DisqusBlogPost>();
 
         if (doc.DocumentElement == null)
         {
-            return [];
+            return blogPosts;
         }
 
         var xthreads = doc.DocumentElement.SelectNodes("def:thread", nsmgr);
         if (xthreads == null)
         {
-            return [];
+            return blogPosts;
         }
 
-        var blogPosts = new List<DisqusBlogPost>();
         var i = 0;
         foreach (XmlNode xthread in xthreads)
         {
@@ -56,38 +60,37 @@ public static class XmlParser
             var id = long.Parse(xthread.Attributes!.Item(0)!.Value!);
             var title = xthread["title"]?.InnerText ?? string.Empty;
             var url = xthread["link"]?.InnerText ?? string.Empty;
-            var isValid = CheckThreadUrl(url);
             var isDeleted = bool.Parse(xthread["isDeleted"]!.InnerText!);
             var isClosed = bool.Parse(xthread["isClosed"]!.InnerText!);
             var createdAt = DateTime.Parse(xthread["createdAt"]!.InnerText!);
 
-            if (isDeleted || isClosed || !isValid)
+            if (isDeleted || isClosed)
             {
                 continue;
             }
 
-            blogPosts.Add(new DisqusBlogPost(id, title, url, createdAt));
+            blogPosts.Add(id, new DisqusBlogPost(id, title, url, createdAt));
         }
 
         return blogPosts;
     }
 
-    private static List<DisqusComment> FindDisqusComments(XmlDocument doc, XmlNamespaceManager nsmgr)
+    private static IDictionary<long, DisqusComment> FindDisqusComments(XmlDocument doc, XmlNamespaceManager nsmgr)
     {
         Logger.LogMethod(nameof(FindDisqusComments));
+        var disqusComments = new Dictionary<long, DisqusComment>();
 
         if (doc.DocumentElement is null)
         {
-            return [];
+            return disqusComments;
         }
 
         var xposts = doc.DocumentElement.SelectNodes("def:post", nsmgr);
         if (xposts == null)
         {
-            return [];
+            return disqusComments;
         }
 
-        var disqusComments = new List<DisqusComment>();
         var i = 0;
         foreach (XmlNode xpost in xposts)
         {
@@ -95,7 +98,7 @@ public static class XmlParser
 
             var id = long.Parse(xpost.Attributes!.Item(0)!.Value!);
             var blogPostId = long.Parse(xpost["thread"]!.Attributes!.Item(0)!.Value!);
-            var parentId = long.Parse(xpost["parent"]?.Attributes?.Item(0)?.Value ?? "0");
+            var parentId = long.TryParse(xpost["parent"]?.Attributes?.Item(0)?.Value, out var temp) ? temp : default;
             var isDeleted = bool.Parse(xpost["isDeleted"]!.InnerText);
             var isSpam = bool.Parse(xpost["isSpam"]!.InnerText);
             var authorNode = xpost["author"]!;
@@ -114,59 +117,70 @@ public static class XmlParser
                 continue;
             }
 
-            // resolve disqus mentions issue
-            var pattern = @"@\w+:disqus";
-            var regex = new Regex(pattern, RegexOptions.Compiled);
-            if (StaticSettings.DisqusMentions.TryGetValue(id, out var replaceWith) &&
-                !string.IsNullOrEmpty(replaceWith))
-            {
-                message = regex.Replace(message, replaceWith);
-            }
-
-            // resolve multilevel reply comments as it is not supported in GitHub discussions
-            if (StaticSettings.MultiLevelReplyComments.TryGetValue(id, out var newValue) &&
-                newValue != default)
-            {
-                parentId = newValue;
-            }
-
             var post = new DisqusComment(
                 id,
                 blogPostId,
                 parentId,
                 message,
                 createdAt,
-                authorName,
-                authorUsername
+                new Author(authorName, authorUsername)
             );
 
-            disqusComments.Add(post);
+            disqusComments.Add(id, post);
         }
 
         return disqusComments;
     }
 
-    private static List<DisqusBlogPost> MergeThreadsWithPosts(List<DisqusBlogPost> threads, List<DisqusComment> posts)
+    private static List<DisqusBlogPost> MergeThreadsWithPosts(IDictionary<long, DisqusBlogPost> blogposts, IDictionary<long, DisqusComment> comments)
     {
-        Logger.LogMethod(nameof(MergeThreadsWithPosts));
-
-        foreach (var thread in threads)
+        Logger.Log("Adding toplevel comments", LogLevel.Info);
+        foreach (var comment in comments.Values.Where(x => x.ParentId == 0))
         {
-            var threadsPosts = posts
-                .Where(x => x.DisqusBlogPostId == thread.Id)
-                .OrderBy(x => x.CreatedAt);
-
-            thread.DisqusComments.AddRange(threadsPosts);
+            var blogPost = blogposts[comment.DisqusBlogPostId];
+            blogPost.DisqusComments.Add(comment);
         }
 
-        threads = threads
-            .Where(x => x.DisqusComments.Count != 0)
+        Logger.Log("Adding child comments", LogLevel.Info);
+        foreach (var comment in comments.Values.Where(x => x.ParentId !=  0))
+        {
+            try
+            {                
+                var parentComment = comments[comment.ParentId];
+                if (parentComment.ParentId != 0)
+                {
+                    Logger.Log($"Re-parenting comment {comment.Id}", LogLevel.Info);
+                    while (parentComment.ParentId != 0)
+                    {
+                        parentComment = comments[parentComment.ParentId];
+                    }
+                }
+                parentComment.ChildComments.Add(comment);
+            }
+            catch (Exception)
+            {
+                Logger.Log($"Error adding child comment {comment.Id} to parent {comment.ParentId}", LogLevel.Info);
+                throw;
+            }
+        }
+
+        var result = blogposts.Values
+            .Where(blogPost => blogPost.DisqusComments.Count != 0 && IsValidUrl(blogPost.Url))
+            .Select(blogPost =>
+            {
+                blogPost.DisqusComments = blogPost.DisqusComments
+                .OrderBy(comment => comment.CreatedAt)
+                .ToList();
+
+                return blogPost;
+            })
             .OrderBy(x => x.CreatedAt)
             .ToList();
-        return threads;
+
+        return result;
     }
 
-    private static bool CheckThreadUrl(string url)
+    private static bool IsValidUrl(string url)
     {
         if (!url.StartsWith("https://ssw.com.au/rules") && !url.StartsWith("https://www.ssw.com.au/rules"))
         {
@@ -174,5 +188,26 @@ public static class XmlParser
         }
 
         return true;
+    }
+
+    private static void FixDisqusUserMentions(IDictionary<long, DisqusComment> comments)
+    {
+        var authors = comments.Values
+            .Select(x => x.Author)
+            .DistinctBy(x => x.Username)
+            .ToDictionary(x => x.Username!, x => x);
+
+        foreach (var comment in comments.Values)
+        {
+            if (DisqusUserRegex.Match(comment.Message) is { Success: true, Groups: { Count: 2} groups })
+            {
+                var username = groups[1].Value;
+                var author = authors.TryGetValue(username, out var known)
+                    ? known.AuthorAnchor
+                    : username;
+
+                comment.Message = DisqusUserRegex.Replace(comment.Message, author);
+            }
+        }
     }
 }

@@ -8,11 +8,11 @@ public class DisqusBlogPost(long id, string title, string url, DateTime createdA
 
     public string Url { get; set; } = url;
 
-    public List<DisqusComment> DisqusComments { get; set; } = [];
+    public List<DisqusComment> DisqusComments { get; set; } = new();
 
     public DateTime CreatedAt { get; set; } = createdAt;
 
     public Rule Rule { get; set; } = new Rule();
 
-    public GitHubDiscussion? AssociatedDiscussion { get; set; }
+    public GitHubDiscussion? AssociatedGitHubDiscussion { get; set; }
 }

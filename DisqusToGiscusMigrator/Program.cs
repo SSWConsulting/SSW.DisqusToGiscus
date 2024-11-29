@@ -1,38 +1,47 @@
-﻿using System.Text.Json;
-using DisqusToGiscusMigrator.Constants;
+﻿using DisqusToGiscusMigrator.Constants;
 using DisqusToGiscusMigrator.Helpers;
-using DisqusToGiscusMigrator.Models;
 
 namespace DisqusToGiscusMigrator;
 
 public class Program
 {
-    private static readonly HttpClient _httpClient = new();
     private static readonly GitHubHelper _githubHelper = new();
 
     public static async Task Main()
     {
-        var disqusBlogPosts = XmlParser.Parse(StaticSettings.DisqusCommentsPath);
+        var checkpointer = new Checkpointer(StaticSettings.CheckPointFilePath);
+        var (migrationStatus, disqusBlogPosts) = checkpointer.TryLoad();
 
-        await RuleHelper.SetMarkdownFileLocation(disqusBlogPosts);
-        await RuleHelper.SetGuid(disqusBlogPosts);
+        if (migrationStatus == MigrationStatus.Unparsed)
+        {
+            disqusBlogPosts = XmlParser.Parse(StaticSettings.DisqusCommentsXmlPath);
+            migrationStatus = MigrationStatus.ParsingCompleted;
+            checkpointer.Checkpoint(migrationStatus, disqusBlogPosts);
+        }
 
-        await _githubHelper.AssociateDiscussions(disqusBlogPosts);
+        if (migrationStatus == MigrationStatus.ParsingCompleted)
+        {
+            await RuleHelper.SetMarkdownFileLocation(disqusBlogPosts);
+            await RuleHelper.SetGuid(disqusBlogPosts);
+            migrationStatus = MigrationStatus.RuleInfoIsSet;
+            checkpointer.Checkpoint(migrationStatus, disqusBlogPosts);
+        }
 
-        WriteToJson(disqusBlogPosts);
+        if (migrationStatus == MigrationStatus.RuleInfoIsSet)
+        {
+            await _githubHelper.AssociateDiscussions(disqusBlogPosts);
+            migrationStatus = MigrationStatus.DiscussionsAssociated;
+            checkpointer.Checkpoint(migrationStatus, disqusBlogPosts);
+        }
+
+        if (migrationStatus == MigrationStatus.DiscussionsAssociated)
+        {
+            // TODO
+            Logger.Log("Add comments", LogLevel.Info);
+            //migrationStatus = MigrationStatus.CommentsAssociated;
+            //checkpointer.Checkpoint(migrationStatus, disqusBlogPosts);
+        }
 
         Logger.Log("Migration is finished", LogLevel.Info);
-    }
-
-    private static void WriteToJson(List<DisqusBlogPost> threads)
-    {
-        Logger.LogMethod(nameof(WriteToJson));
-
-        var json = JsonSerializer.Serialize(threads, new JsonSerializerOptions
-        {
-            WriteIndented = true
-        });
-
-        File.WriteAllText(@"C:\\Users\\baban\\Downloads\\disqus-comments.json", json);
     }
 }
