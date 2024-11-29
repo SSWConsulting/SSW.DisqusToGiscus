@@ -62,7 +62,6 @@ public class GitHubHelper
                                 ID = discussion.Id.Value,
                                 Title = discussion.Title,
                                 Body = discussion.Body,
-                                ID = discussion.Id,
                                 Number = discussion.Number
                             })
                         )).SingleOrDefault()
@@ -119,7 +118,6 @@ public class GitHubHelper
                     ID = x.Discussion.Id.Value,
                     Title = x.Discussion.Title,
                     Body = x.Discussion.Body,
-                    ID = x.Discussion.Id,
                     Number = x.Discussion.Number
                 });
 
@@ -206,7 +204,6 @@ public class GitHubHelper
                     ID = discussion.Id.Value,
                     Title = discussion.Title,
                     Body = discussion.Body,
-                    ID = discussion.Id,
                     Number = discussion.Number
                 });
             }

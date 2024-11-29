@@ -51,27 +51,4 @@ public static class StaticSettings
         { "https://www.ssw.com.au/rules/dns-what-and-how-it-works/", "rules/what-is-dns/rule.md" },
         { "https://www.ssw.com.au/rules/manage-urges/", "rules/separate-urge-from-behavior/rule.md" }
     };
-
-    /// <summary>
-    /// To avoid broken links in GitHub discussions, because when "@username:disqus" is
-    /// added to GitHub discussion, it will be the link to the GitHub user.
-    /// </summary>
-    /// <key type="long">Id of Disqus comment which has mentions(@username:discus) in the message property</key>
-    /// <value type="string">Replace the mentions with the specified value</value>
-    public static Dictionary<long, string> DisqusMentions { get; } = new()
-    {
-        { 6105939616, "{{PLACEHOLDER}}" },
-        { 6201620423, "{{PLACEHOLDER}}" }
-    };
-
-    /// <summary>
-    /// Multilevel reply comments is not supported in GitHub discussions
-    /// </summary>
-    /// <key type="long">Id of Disqus miltilevel reply comment</key>
-    /// <value type="long">New value for Parent Id property of multilevel comment</value>
-    public static Dictionary<long, long> MultiLevelReplyComments { get; } = new()
-    {
-        { 5492294233, 5491639342 },
-        { 6292194250, 6288502889 }
-    };
 }

@@ -3,25 +3,24 @@ namespace DisqusToGiscusMigrator.Models;
 public class DisqusComment(
     long id,
     long disqusBlogPostId,
-    long? parentId,
+    long parentId,
     string message,
     DateTime createdAt,
-    string authorName,
-    string authorUsername)
+    Author author)
 {
     public long Id { get; } = id;
 
     public long DisqusBlogPostId { get; } = disqusBlogPostId;
 
-    public long? ParentId { get; set; } = parentId;
+    public long ParentId { get; set; } = parentId;
 
     public string Message { get; set; } = message;
 
     public DateTime CreatedAt { get; } = createdAt;
 
-    public string AuthorName { get; } = authorName;
+    public Author Author { get; } = author;
 
-    public string AuthorUsername { get; } = authorUsername;
+    public List<DisqusComment> ChildComments { get; set; } = new();
 
     public GitHubComment? AssociatedGitHubComment { get; set; }
 }
