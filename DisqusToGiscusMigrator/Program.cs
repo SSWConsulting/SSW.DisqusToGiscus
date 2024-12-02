@@ -36,10 +36,9 @@ public class Program
 
         if (migrationStatus == MigrationStatus.DiscussionsAssociated)
         {
-            // TODO
-            Logger.Log("Add comments", LogLevel.Info);
-            //migrationStatus = MigrationStatus.CommentsAssociated;
-            //checkpointer.Checkpoint(migrationStatus, disqusBlogPosts);
+            await _githubHelper.AssociateComments(disqusBlogPosts, () => checkpointer.Checkpoint(migrationStatus, disqusBlogPosts));
+            migrationStatus = MigrationStatus.CommentsAssociated;
+            checkpointer.Checkpoint(migrationStatus, disqusBlogPosts);
         }
 
         Logger.Log("Migration is finished", LogLevel.Info);

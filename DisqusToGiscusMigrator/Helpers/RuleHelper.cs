@@ -58,7 +58,7 @@ public static class RuleHelper
         }
     }
 
-    public static async Task SetGuid(List<DisqusBlogPost> threads)
+    public static async Task SetGuid(List<DisqusBlogPost> blogPosts)
     {
         Logger.LogMethod(nameof(SetGuid));
 
@@ -66,41 +66,52 @@ public static class RuleHelper
             .UseYamlFrontMatter()
             .Build();
 
-        foreach (var thread in threads)
+        foreach (var post in blogPosts)
         {
-            var url = $"{StaticSettings.ContentRepoRawPath}{thread.Rule.File}";
-
-            string? ruleRawContent = string.Empty;
+            var ruleRawContent = string.Empty;
+            var url = $"{StaticSettings.ContentRepoRawPath}{post.Rule.File}";
 
             try
             {
                 ruleRawContent = await _httpClient.GetStringAsync(url);
             }
-            catch
+            catch (Exception ex)
             {
-                Logger.Log($"Failed to access this rule file: {thread.Rule.File}", LogLevel.Warning);
-                Logger.Log($"Failed Disqus thread URL: {thread.Url}", LogLevel.Warning);
+                Logger.Log($"Failed to access rule file: {post.Rule.File}", LogLevel.Error);
+                throw new Exception(ex.Message);
             }
             
+            if (string.IsNullOrWhiteSpace(ruleRawContent))
+            {
+                Logger.Log($"Rule raw content is empty rule file: {post.Rule.File}", LogLevel.Error);
+                throw new Exception();
+            }
 
             var document = Markdown.Parse(ruleRawContent, pipeline);
             var frontMatter = document.Descendants<YamlFrontMatterBlock>().FirstOrDefault();
 
             if (frontMatter is null)
             {
-                continue;
+                Logger.Log($"Frontmatter is null for rule file: {post.Rule.File}", LogLevel.Error);
+                throw new Exception();
             }
 
             var yaml = frontMatter.Lines.ToString();
-
             var deserializer = new DeserializerBuilder()
                 .IgnoreUnmatchedProperties()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .Build();
 
-            var metadata = deserializer.Deserialize<RuleMetadata>(yaml);
-
-            thread.Rule.Guid = metadata.Guid;
+            try
+            {
+                var metadata = deserializer.Deserialize<RuleMetadata>(yaml);
+                post.Rule.Guid = metadata.Guid;
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"Failed to deserialize YAML for rule file: {post.Rule.File}", LogLevel.Error);
+                throw new Exception(ex.Message);
+            }
         }
     }
 }
