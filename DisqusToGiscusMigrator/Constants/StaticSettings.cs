@@ -22,6 +22,8 @@ public static class StaticSettings
 
     public const string DiscussionCategory = "Test Migration";
 
+    public const string DisqusForumLocation = "https://disqus.com/home/forum/sswrules/";
+
     public static readonly string[] IgnoredDisqusUsername =
     [
         "{{DISQUS_USERNAME}}"

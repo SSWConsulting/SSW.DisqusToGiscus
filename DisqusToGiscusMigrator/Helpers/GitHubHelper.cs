@@ -41,6 +41,28 @@ public class GitHubHelper
         }
     }
 
+    public async Task AssociateComments(List<DisqusBlogPost> disqusBlogPosts, Action checkpoint)
+    {
+        await PrintRateLimit();
+        foreach (var blogPost in disqusBlogPosts)
+        {
+            Logger.Log($"Adding comments for Disqus blog post: {blogPost.Id}", LogLevel.Info);
+            if (blogPost.AssociatedGitHubDiscussion is null)
+            {
+                throw new Exception($"Discussion is null for {blogPost.Id}");
+            }            
+
+            foreach (var topLevelComment in blogPost.DisqusComments)
+            {
+                await CreateComment(blogPost, topLevelComment, blogPost.AssociatedGitHubDiscussion, checkpoint, replyTo: null);
+                foreach (var childComment in topLevelComment.ChildComments)
+                {
+                    await CreateComment(blogPost, childComment, blogPost.AssociatedGitHubDiscussion, checkpoint, replyTo: topLevelComment);
+                }
+            }
+        }
+    }
+
     private async Task<GitHubDiscussion?> FindDiscussionByGuid(string guid)
     {
         Logger.LogMethod(nameof(FindDiscussionByGuid));
@@ -138,6 +160,65 @@ public class GitHubHelper
             Logger.Log($"Error creating discussion for Disqus blog post ({post.Id})", LogLevel.Error);
             throw;
         }
+    }
+
+    private async Task CreateComment(DisqusBlogPost blogPost, DisqusComment comment, GitHubDiscussion discussion, Action checkpoint, DisqusComment? replyTo)
+    {
+        try
+        {
+            if (comment.AssociatedGitHubComment is null)
+            {
+                comment.AssociatedGitHubComment = await CreateDiscussionComment(discussion, comment, replyTo);
+                checkpoint();
+                await Task.Delay(2_500);
+            }
+        }
+        catch (Exception)
+        {
+            Logger.Log($"Error adding comment {comment.Id}", LogLevel.Error);
+            throw;
+        }
+    }
+
+    private async Task<GitHubComment> CreateDiscussionComment(GitHubDiscussion discussion, DisqusComment comment, DisqusComment? parentComment)
+    {
+        var body = $"""
+                   <em>{comment.Author.AuthorMarkdown} commented [on Disqus]({StaticSettings.DisqusForumLocation}) at {comment.CreatedAt:MMMM dd yyyy, hh:mm}</em>
+
+                   ---
+
+                   {comment.Message}
+                   """;
+
+        ID? replyToId = string.IsNullOrEmpty(parentComment?.AssociatedGitHubComment?.ID)
+            ? null
+            : new ID(parentComment.AssociatedGitHubComment.ID);
+
+        var mutation = new Mutation()
+            .AddDiscussionComment(new AddDiscussionCommentInput
+            {
+                Body = body,
+                DiscussionId = new ID(discussion.ID),
+                ReplyToId = replyToId
+            })
+            .Select(x => new
+            {
+                x.Comment.Id,
+                x.Comment.Url
+            });
+
+        var newComment = await _botConnection.Run(mutation);
+
+        if (newComment is null)
+        {
+            throw new Exception($"Failed to create GitHub comment. Disqus comment Id: {comment.Id}");
+        }
+
+        return new GitHubComment()
+        {
+            ID = newComment.Id.Value,
+            Url = newComment.Url
+        };
     }
 
     /*
@@ -262,6 +343,29 @@ public class GitHubHelper
         {
             Logger.Log("Error fetching category ID", LogLevel.Error);
             throw;
+        }
+    }
+
+    private async Task PrintRateLimit()
+    {
+        try
+        {
+            var query = new Query()
+                .RateLimit()
+                .Select(x => new
+                {
+                    x.Limit,
+                    x.Remaining,
+                    x.ResetAt
+                })
+                .Compile();
+
+            var results = await _botConnection.Run(query);
+            Logger.Log($"The bot connection currently has {results.Remaining} of {results.Limit}. Resets at {results.ResetAt:T}", LogLevel.Info);
+        }
+        catch (Exception)
+        {
+            Logger.Log("Error fetching rate limit", LogLevel.Error);
         }
     }
 }
