@@ -3,35 +3,25 @@ namespace DisqusToGiscusMigrator.Constants;
 public static class StaticSettings
 {
     public const string DisqusCommentsXmlPath = "{{PATH_TO_DISQUS_XML_FILE}}";
-
     public const string CheckPointFilePath = "{{PATH_TO_JSON_CHEKPOINT_FILE}}";
-
     public const string BotPAT = "{{BOT_PAT}}";
-
     public const string MainPAT = "{{MAIN_PAT}}";
-
     public const string BotGitHubUsername = "ssw-rules-comments-migrator";
-
     public const string ContentRepoRawPath = "https://raw.githubusercontent.com/SSWConsulting/SSW.Rules.Content/refs/heads/main/";
-
     public const string RulesHistoryJsonUrl = "https://www.ssw.com.au/rules/history.json";
-
     public const string RepoOwner = "SSWConsulting";
-    
     public const string RepoName = "SSW.Rules.Staging.Discussions";
-
     public const string DiscussionCategory = "Test Migration";
-
     public const string DisqusForumLocation = "https://disqus.com/home/forum/sswrules/";
 
-    public static readonly string[] IgnoredDisqusUsername =
+    public static readonly string[] IgnoredDisqusUsernames =
     [
         "{{DISQUS_USERNAME}}"
     ];
 
     /// <summary>
-    /// Use specified file location instead of getting it from history.json,
-    /// as I faced issue where the location wasn't correct anymore due to url/folder name changes
+    /// Use specified file location instead of from history.json for some rules,
+    /// as I've faced issue where the location wasn't correct anymore due to url/folder name changes
     /// </summary>
     /// <key type="string">Disqus thread URL</key>    
     /// <value type="string">Markdown file location</value>

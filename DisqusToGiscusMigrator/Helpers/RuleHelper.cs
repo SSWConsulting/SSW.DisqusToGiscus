@@ -18,7 +18,7 @@ public static class RuleHelper
 {
     private static readonly HttpClient _httpClient = new();
 
-    public static async Task SetMarkdownFileLocation(List<DisqusBlogPost> threads)
+    public static async Task SetMarkdownFileLocation(List<DisqusBlogPost> blogPosts)
     {
         Logger.LogMethod(nameof(SetMarkdownFileLocation));
 
@@ -31,29 +31,30 @@ public static class RuleHelper
             rulesHistory = JsonSerializer.Deserialize<List<RulesHistory>>(content) ?? [];
         }
 
-        foreach (var thread in threads)
+        foreach (var post in blogPosts)
         {
             var forcedFileLocation = string.Empty;
-            StaticSettings.ForcedFileLocations.TryGetValue(thread.Url, out forcedFileLocation);
+            StaticSettings.ForcedFileLocations.TryGetValue(post.Url, out forcedFileLocation);
 
             if (!string.IsNullOrWhiteSpace(forcedFileLocation))
             {
-                thread.Rule.File = forcedFileLocation;
+                post.Rule.File = forcedFileLocation;
             }
             else
             {
-                var uri = new Uri(thread.Url);
+                var uri = new Uri(post.Url);
                 var lastPart = uri.Segments.Last().Trim('/');
 
-                thread.Rule.File = rulesHistory
+                post.Rule.File = rulesHistory
                     .Where(rh => rh.File.Contains(lastPart, StringComparison.OrdinalIgnoreCase))
                     .Select(rh => rh.File.ToLower())
                     .FirstOrDefault() ?? string.Empty;
             }
 
-            if (string.IsNullOrEmpty(thread.Rule.File))
+            if (string.IsNullOrEmpty(post.Rule.File))
             {
-                Console.WriteLine($"Wasn't able to get rule file location for thread ({thread.Id})");
+                Logger.Log($"Rule file location is empty for Disqus blog post: {post.Id}", LogLevel.Error);
+                throw new Exception();
             }
         }
     }

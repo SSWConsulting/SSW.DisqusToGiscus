@@ -24,9 +24,7 @@ public static class XmlParser
             var blogPosts = FindDisqusBlogPosts(doc, nsmgr);
             var comments = FindDisqusComments(doc, nsmgr);
             FixDisqusUserMentions(comments);
-
             var result = MergeThreadsWithPosts(blogPosts, comments);
-
             return result;
         }
         else
@@ -56,7 +54,6 @@ public static class XmlParser
         foreach (XmlNode xthread in xthreads)
         {
             i++;
-
             var id = long.Parse(xthread.Attributes!.Item(0)!.Value!);
             var title = xthread["title"]?.InnerText ?? string.Empty;
             var url = xthread["link"]?.InnerText ?? string.Empty;
@@ -68,10 +65,8 @@ public static class XmlParser
             {
                 continue;
             }
-
             blogPosts.Add(id, new DisqusBlogPost(id, title, url, createdAt));
         }
-
         return blogPosts;
     }
 
@@ -95,7 +90,6 @@ public static class XmlParser
         foreach (XmlNode xpost in xposts)
         {
             i++;
-
             var id = long.Parse(xpost.Attributes!.Item(0)!.Value!);
             var blogPostId = long.Parse(xpost["thread"]!.Attributes!.Item(0)!.Value!);
             var parentId = long.TryParse(xpost["parent"]?.Attributes?.Item(0)?.Value, out var temp) ? temp : default;
@@ -112,7 +106,7 @@ public static class XmlParser
                 continue;
             }
 
-            if (StaticSettings.IgnoredDisqusUsername.Where(u => u.Equals(authorUsername)).Any())
+            if (StaticSettings.IgnoredDisqusUsernames.Where(u => u.Equals(authorUsername)).Any())
             {
                 continue;
             }
@@ -125,10 +119,8 @@ public static class XmlParser
                 createdAt,
                 new Author(authorName, authorUsername)
             );
-
             disqusComments.Add(id, post);
         }
-
         return disqusComments;
     }
 
@@ -186,7 +178,6 @@ public static class XmlParser
         {
             return false;
         }
-
         return true;
     }
 
