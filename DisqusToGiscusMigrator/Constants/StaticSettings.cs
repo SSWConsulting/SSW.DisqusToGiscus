@@ -14,6 +14,11 @@ public static class StaticSettings
     public const string DiscussionCategory = "Test Migration";
     public const string DisqusForumLocation = "https://disqus.com/home/forum/sswrules/";
 
+    /// <summary>
+    /// Here we can add Disqus usernames of users who already add their comments manually,
+    /// so they will be ignored during the migration process
+    /// </summary>  
+    /// <value type="string">Username of Disqus user</value>
     public static readonly string[] IgnoredDisqusUsernames =
     [
         "{{DISQUS_USERNAME}}"
